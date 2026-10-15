@@ -17,12 +17,16 @@ class MainActivity: FlutterActivity() {
 
         fun sendSmsToFlutter(body: String, sender: String) {
             val data = mapOf("type" to "SMS", "body" to body, "sender" to sender)
-            methodChannel?.invokeMethod("onMessageReceived", data)
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                methodChannel?.invokeMethod("onMessageReceived", data)
+            }
         }
 
         fun sendNotificationToFlutter(body: String, sender: String) {
             val data = mapOf("type" to "PUSH", "body" to body, "sender" to sender)
-            methodChannel?.invokeMethod("onMessageReceived", data)
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                methodChannel?.invokeMethod("onMessageReceived", data)
+            }
         }
     }
 
