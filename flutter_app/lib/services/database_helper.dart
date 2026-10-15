@@ -225,36 +225,55 @@ class DatabaseHelper {
   }
 
   Future<Map<String, dynamic>> getDashboardSummary() async {
-    final db = await database;
-    final nowMonth = DateTime.now().toString().substring(0, 7); // YYYY-MM
+    try {
+      final db = await database;
+      final nowMonth = DateTime.now().toString().substring(0, 7); // YYYY-MM
 
-    // Net worth
-    final nwRes = await db.rawQuery('SELECT SUM(balance) as total FROM accounts;');
-    double netWorth = (nwRes.first['total'] as num?)?.toDouble() ?? 0.0;
+      // Net worth
+      final nwRes = await db.rawQuery('SELECT SUM(balance) as total FROM accounts;');
+      double netWorth = 0.0;
+      if (nwRes.isNotEmpty && nwRes.first['total'] != null) {
+        netWorth = (nwRes.first['total'] as num).toDouble();
+      }
 
-    // Monthly Income
-    final incRes = await db.rawQuery(
-      "SELECT SUM(amount) as total FROM transactions WHERE trans_type = 'Credit' AND trans_date LIKE ?;",
-      ['$nowMonth%'],
-    );
-    double income = (incRes.first['total'] as num?)?.toDouble() ?? 0.0;
+      // Monthly Income
+      final incRes = await db.rawQuery(
+        "SELECT SUM(amount) as total FROM transactions WHERE trans_type = 'Credit' AND trans_date LIKE ?;",
+        ['$nowMonth%'],
+      );
+      double income = 0.0;
+      if (incRes.isNotEmpty && incRes.first['total'] != null) {
+        income = (incRes.first['total'] as num).toDouble();
+      }
 
-    // Monthly Expense
-    final expRes = await db.rawQuery(
-      "SELECT SUM(amount + COALESCE(fee, 0)) as total FROM transactions WHERE trans_type = 'Debit' AND trans_date LIKE ?;",
-      ['$nowMonth%'],
-    );
-    double expense = (expRes.first['total'] as num?)?.toDouble() ?? 0.0;
+      // Monthly Expense
+      final expRes = await db.rawQuery(
+        "SELECT SUM(amount + COALESCE(fee, 0)) as total FROM transactions WHERE trans_type = 'Debit' AND trans_date LIKE ?;",
+        ['$nowMonth%'],
+      );
+      double expense = 0.0;
+      if (expRes.isNotEmpty && expRes.first['total'] != null) {
+        expense = (expRes.first['total'] as num).toDouble();
+      }
 
-    // Accounts
-    final accounts = await getAccounts();
+      // Accounts
+      final accounts = await getAccounts();
 
-    return {
-      'net_worth': netWorth,
-      'monthly_income': income,
-      'monthly_expense': expense,
-      'net_savings': income - expense,
-      'accounts': accounts,
-    };
+      return {
+        'net_worth': netWorth,
+        'monthly_income': income,
+        'monthly_expense': expense,
+        'net_savings': income - expense,
+        'accounts': accounts,
+      };
+    } catch (e) {
+      return {
+        'net_worth': 0.0,
+        'monthly_income': 0.0,
+        'monthly_expense': 0.0,
+        'net_savings': 0.0,
+        'accounts': <AccountModel>[],
+      };
+    }
   }
 }

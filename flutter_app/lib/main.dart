@@ -7,6 +7,10 @@ import 'services/native_bridge.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+  };
   NativeBridge.initialize();
   runApp(const PakExpenseApp());
 }

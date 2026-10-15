@@ -26,18 +26,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> refreshData() async {
-    setState(() => _isLoading = true);
-    final summary = await DatabaseHelper.instance.getDashboardSummary();
-    final recent = await DatabaseHelper.instance.getTransactions(limit: 6);
+    try {
+      setState(() => _isLoading = true);
+      final summary = await DatabaseHelper.instance.getDashboardSummary();
+      final recent = await DatabaseHelper.instance.getTransactions(limit: 6);
 
-    setState(() {
-      _netWorth = summary['net_worth'];
-      _monthlyIncome = summary['monthly_income'];
-      _monthlyExpense = summary['monthly_expense'];
-      _accounts = summary['accounts'];
-      _recentTxs = recent;
-      _isLoading = false;
-    });
+      if (!mounted) return;
+      setState(() {
+        _netWorth = (summary['net_worth'] as num?)?.toDouble() ?? 0.0;
+        _monthlyIncome = (summary['monthly_income'] as num?)?.toDouble() ?? 0.0;
+        _monthlyExpense = (summary['monthly_expense'] as num?)?.toDouble() ?? 0.0;
+        _accounts = (summary['accounts'] as List<AccountModel>?) ?? [];
+        _recentTxs = recent;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Color _hexToColor(String hex) {

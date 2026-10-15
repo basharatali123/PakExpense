@@ -52,16 +52,20 @@ class MainActivity: FlutterActivity() {
     }
 
     private fun isNotificationListenerEnabled(): Boolean {
-        val pkgName = packageName
-        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        if (!TextUtils.isEmpty(flat)) {
-            val names = flat.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            for (name in names) {
-                val cn = ComponentName.unflattenFromString(name)
-                if (cn != null && TextUtils.equals(pkgName, cn.packageName)) {
-                    return true
+        try {
+            val pkgName = packageName
+            val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+            if (!TextUtils.isEmpty(flat)) {
+                val names = flat.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                for (name in names) {
+                    val cn = ComponentName.unflattenFromString(name)
+                    if (cn != null && TextUtils.equals(pkgName, cn.packageName)) {
+                        return true
+                    }
                 }
             }
+        } catch (e: Exception) {
+            return false
         }
         return false
     }
