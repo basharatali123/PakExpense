@@ -23,8 +23,11 @@ class _SmsParserScreenState extends State<SmsParserScreen> {
   }
 
   Future<void> _checkPermissions() async {
-    final active = await NativeBridge.isNotificationListenerEnabled();
-    setState(() => _isNotificationListenerActive = active);
+    try {
+      final active = await NativeBridge.isNotificationListenerEnabled();
+      if (!mounted) return;
+      setState(() => _isNotificationListenerActive = active);
+    } catch (_) {}
   }
 
   void _loadSampleSms() {

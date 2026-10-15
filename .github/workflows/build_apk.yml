@@ -53,8 +53,8 @@ jobs:
           # 4. Align package namespace and applicationId
           sed -i 's/com.pakexpense.pak_expense/com.pakexpense.app/g' android/app/build.gradle
           
-          # 5. Disable release fatal lint abort
-          echo "android { lintOptions { checkReleaseBuilds false; abortOnError false } }" >> android/app/build.gradle
+          # 5. Disable release fatal lint abort and code shrinking
+          echo "android { lintOptions { checkReleaseBuilds false; abortOnError false } buildTypes { release { minifyEnabled false; shrinkResources false } } }" >> android/app/build.gradle
 
       - name: Install Flutter Dependencies
         run: flutter pub get

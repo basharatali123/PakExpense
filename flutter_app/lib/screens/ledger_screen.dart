@@ -25,13 +25,18 @@ class _LedgerScreenState extends State<LedgerScreen> {
   }
 
   Future<void> _loadTransactions() async {
-    setState(() => _isLoading = true);
-    final txs = await DatabaseHelper.instance.getTransactions(limit: 200);
-    setState(() {
-      _transactions = txs;
-      _filteredTransactions = txs;
-      _isLoading = false;
-    });
+    try {
+      setState(() => _isLoading = true);
+      final txs = await DatabaseHelper.instance.getTransactions(limit: 200);
+      if (!mounted) return;
+      setState(() {
+        _transactions = txs;
+        _filteredTransactions = txs;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _onSearch(String query) {

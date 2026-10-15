@@ -6,12 +6,14 @@ import 'sms_parser.dart';
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static Future<Database>? _dbFuture;
 
   DatabaseHelper._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('pak_finance.db');
+    _dbFuture ??= _initDB('pak_finance.db');
+    _database = await _dbFuture;
     return _database!;
   }
 
@@ -28,7 +30,7 @@ class DatabaseHelper {
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE accounts (
+      CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
         code TEXT,
@@ -39,7 +41,7 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE categories (
+      CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
         category_type TEXT NOT NULL,
@@ -48,7 +50,7 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE transactions (
+      CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         account_id INTEGER NOT NULL,
         category_id INTEGER,
@@ -78,7 +80,7 @@ class DatabaseHelper {
     ];
 
     for (var acc in accounts) {
-      await db.insert('accounts', acc);
+      await db.insert('accounts', acc, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
 
     // Seed default Pakistani categories
@@ -98,7 +100,7 @@ class DatabaseHelper {
     ];
 
     for (var cat in categories) {
-      await db.insert('categories', cat);
+      await db.insert('categories', cat, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 

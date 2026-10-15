@@ -75,15 +75,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {});
   }
 
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0:
+        return const DashboardScreen();
+      case 1:
+        return SmsParserScreen(onDataChanged: _triggerRefresh);
+      case 2:
+        return LedgerScreen(onDataChanged: _triggerRefresh);
+      case 3:
+        return QuickAddScreen(onDataChanged: _triggerRefresh);
+      default:
+        return const DashboardScreen();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      const DashboardScreen(),
-      SmsParserScreen(onDataChanged: _triggerRefresh),
-      LedgerScreen(onDataChanged: _triggerRefresh),
-      QuickAddScreen(onDataChanged: _triggerRefresh),
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -97,7 +105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ],
         ),
       ),
-      body: screens[_currentIndex],
+      body: _buildScreen(_currentIndex),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (idx) => setState(() => _currentIndex = idx),

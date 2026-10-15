@@ -30,16 +30,21 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
   }
 
   Future<void> _loadFormData() async {
-    final accs = await DatabaseHelper.instance.getAccounts();
-    final cats = await DatabaseHelper.instance.getCategories();
+    try {
+      final accs = await DatabaseHelper.instance.getAccounts();
+      final cats = await DatabaseHelper.instance.getCategories();
 
-    setState(() {
-      _accounts = accs;
-      _categories = cats;
-      if (accs.isNotEmpty) _selectedAccountId = accs.first.id;
-      if (cats.isNotEmpty) _selectedCategoryId = cats.first.id;
-      _isLoading = false;
-    });
+      if (!mounted) return;
+      setState(() {
+        _accounts = accs;
+        _categories = cats;
+        if (accs.isNotEmpty) _selectedAccountId = accs.first.id;
+        if (cats.isNotEmpty) _selectedCategoryId = cats.first.id;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _saveTransaction() async {
